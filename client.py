@@ -1,4 +1,4 @@
-#  Copyright (C) 2013 Xander Vedejas <xvedejas@gmail.com>
+#  Copyright (C) 2013 Daniel Wilkins <tekk@parlementum.net>
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -12,64 +12,36 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import sys
-from numpy import array
-try:
-    from sdl2 import *
-    import sdl2.ext as sdl2ext
-except ImportError:
-    import traceback
-    traceback.print_exc()
-    sys.exit(1)
-    
-#pysdl2.readthedocs.org/en/latest/tutorial/pong.html
+from sdl2 import *
+import sdl2.ext # needed for colors
+import server
+import numpy
+import time
 
-class SoftwareRenderer(sdl2ext.SoftwareSpriteRenderer):
-    def __init__(self, window):
-        super(SoftwareRenderer, self).__init__(window)
+def main():
+    SDL_Init(SDL_INIT_VIDEO)
+    window = SDL_CreateWindow(b"Whitehill", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 640, 0)
+    windowSurface = SDL_GetWindowSurface(window)
+    world = server.WorldMap(binsize=numpy.array((50, 40)))
 
-    def render(self, components):
-        sdl2ext.fill(self.surface, sdl2ext.Color(0, 0, 0))
-        super(SoftwareRenderer, self).render(components)
+    player = server.Entity(spritename="player", world=world, position=numpy.array((0,0)), zlayer=1, size=numpy.array((16,16)),
+                           collisionbox=server.Box(numpy.ones((16,16))))
+    player.direction = numpy.array((1, 1))
+    player.speed = 16
 
-class Entity(sdl2ext.Entity):
-    """An entity is something drawn on the map that can change position
-       (and thus can be re-drawn), as opposed to the map itself or
-       overlays like menus and text"""
-    def __init__(self, world, sprite, position):
-        self.sprite = sprite
-        self.sprite.position = position
-    def move(self, speed, direction):
-        self.speed = speed
-        self.direction = direction
-    
-def run():
-    sdl2ext.init()
-    window = sdl2ext.Window("The White Hill", size=(800, 600))
-    window.show()
-    
-    world = sdl2ext.World()
+    SDL_FillRect(windowSurface, rect.SDL_Rect(0, 0, 16, 16), sdl2.ext.Color())
+    SDL_UpdateWindowSurface(window)
 
-    spriterenderer = SoftwareRenderer(window)
-    world.add_system(spriterenderer)
-
-    factory = sdl2ext.SpriteFactory(sdl2ext.SOFTWARE)
-    sp_p1 = factory.from_color(sdl2ext.Color(255, 255, 255), size=(20, 100))
-    sp_p2 = factory.from_color(sdl2ext.Color(255, 255, 255), size=(20, 100))
-
-    player1 = Entity(world, sp_p1, array((0, 250)))
-    player2 = Entity(world, sp_p2, array((780, 250)))
-    
     running = True
     while running:
-        events = sdl2ext.get_events()
-        for event in events:
-            if event.type == SDL_QUIT:
-                running = False
-                break
-        world.process()
-        
-    return 0
+        time.sleep(1.0)
+        world.move_all()
+        print(player.position)
+        x, y = player.position
 
-if __name__ == "__main__":
-    sys.exit(run())
+        SDL_FillRect(windowSurface, rect.SDL_Rect(x, y, 16, 16), sdl2.ext.Color())
+        SDL_UpdateWindowSurface(window)
+        pass
+
+
+main()
