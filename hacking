@@ -1,0 +1,50 @@
+
+
+=========
+server.py
+=========
+
+- All location data (player location, map layout, NPC location)
+- Movement resolution
+
+These are the sorts of classes in server.py:
+
+WorldMap: handles immobile obstacles, locations, etc
+Entity: npcs, anything on the screen that moves
+
+=========
+client.py
+=========
+
+- All rendering (sdl), anything to do with images
+- All input (keyboard)
+- All sound output
+
+These are the sorts of classes in client.py:
+
+WorldView: handles rendering according to the state of WorldMap
+Sprite: visual representation (and animation) of an entity
+Overlay: menus, text, etc
+
+=========================
+terminology & conventions
+=========================
+
+"position" vs "bin"
+
+	"position" always means pixel position (absolute on the server where
+	(0,0) is the upper-left of the map, and relative on the client).
+	"bin" means which 16x16pixel bin the pixel occupies. Both position
+	and bin	should be numpy arrays for easy vector math.
+
+z layers
+
+    z layers are integers. If an entity is blocking, it blocks only on that
+    layer. The player is usually on layer 1 and the ground on layer 0.
+
+movement
+
+    the player is given a velocity when it starts moving (when a key is held
+    down) and the velocity is cancelled when the key is released. Both client
+    and server use this to know where the player's entity/sprite is at a given
+    time, without needing to send packets back and forth.
