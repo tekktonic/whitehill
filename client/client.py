@@ -12,11 +12,15 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from sys import path
+path.append("..") # needed to get server.py
+
 from sdl2 import *
 import sdl2.ext # needed for colors
 import server
 import numpy
 import time
+import resourcemanager
 
 def main():
     SDL_Init(SDL_INIT_VIDEO)
@@ -24,12 +28,14 @@ def main():
     windowSurface = SDL_GetWindowSurface(window)
     world = server.WorldMap(binsize=numpy.array((50, 40)))
 
+    resourceManager = resourcemanager.ResourceManager()
+
     player = server.Entity(spritename="player", world=world, position=numpy.array((0,0)), zlayer=1, size=numpy.array((16,16)),
                            collisionbox=server.Box(numpy.ones((16,16))))
     player.direction = numpy.array((1, 1))
     player.speed = 16
 
-    SDL_FillRect(windowSurface, rect.SDL_Rect(0, 0, 16, 16), sdl2.ext.Color())
+    SDL_BlitSurface(resourceManager.fetch(player.spritename + ".png"), None, windowSurface, rect.SDL_Rect(0, 0, 16, 16))
     SDL_UpdateWindowSurface(window)
 
     running = True
@@ -38,8 +44,8 @@ def main():
         world.move_all()
         print(player.position)
         x, y = player.position
-
-        SDL_FillRect(windowSurface, rect.SDL_Rect(x, y, 16, 16), sdl2.ext.Color())
+        SDL_BlitSurface(resourceManager.fetch(player.spritename + ".png"), None, windowSurface, rect.SDL_Rect(x, y, 16, 16))
+    
         SDL_UpdateWindowSurface(window)
         pass
 
