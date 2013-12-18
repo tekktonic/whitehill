@@ -20,6 +20,7 @@ import sdl2.ext # needed for colors
 import server
 import numpy
 import time
+import animation
 import resourcemanager
 
 def main():
@@ -35,7 +36,9 @@ def main():
     player.direction = numpy.array((1, 1))
     player.speed = 16
 
-    SDL_BlitSurface(resourceManager.fetch(player.spritename + ".png"), None, windowSurface, rect.SDL_Rect(0, 0, 16, 16))
+    mainanim = animation.Animation(resourceManager, ("player.png", 1.0))
+
+    SDL_BlitSurface(mainanim.Step().image, None, windowSurface, rect.SDL_Rect(0, 0, 16, 16))
     SDL_UpdateWindowSurface(window)
 
     running = True
@@ -44,7 +47,7 @@ def main():
         world.move_all()
         print(player.position)
         x, y = player.position
-        SDL_BlitSurface(resourceManager.fetch(player.spritename + ".png"), None, windowSurface, rect.SDL_Rect(x, y, 16, 16))
+        SDL_BlitSurface(mainanim.Step().image, None, windowSurface, rect.SDL_Rect(x, y, 16, 16))
     
         SDL_UpdateWindowSurface(window)
         pass
